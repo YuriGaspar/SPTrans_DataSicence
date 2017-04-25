@@ -49,7 +49,6 @@ for year in range(2014, current_year + 1):
                 print ("Dia {} não encontrado".format(month_list_abr[month - 1] + "/" + day_str + "/" + year_str))
                 print (url)
                 errors.append(url)
-                
                 if year == current_year:
                     break
 
@@ -83,6 +82,7 @@ for year in range(2014, current_year + 1):
    
 # Let's check if the sum of the days of month hits with the worksheet's total
 import time
+
 total = {}
 total_paying = {}
 total_integration = {}
@@ -152,11 +152,11 @@ for year in range(2014, current_year + 1):
 
 import statistics
 statistics.mean(ytotal) # Arithmetic mean (average) of data.
-statistics.median(ytotal) # Median (middle value) of data.
 statistics.stdev(ytotal) # Sample standard deviation of data.
 
-#------ Plotting Total Passengers  vs. Month
+#------ Plotting Total Passengers vs. Month
 
+plt.figure(figsize=(10,5))
 x = list(range(0, len(ytotal) ))
 plt.xticks(x, xTicks)
 plt.xticks(range(len(ytotal)), xTicks, rotation=60) #writes strings with 45 degree angle
@@ -171,88 +171,76 @@ for i in range(0, len(ytotal)):
     else :
         colors.append('#48A51A')
 plt.bar(x,ytotal, color=colors)
-plt.tight_layout()
 plt.xlabel("Data")
-plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')   
+plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
 plt.show()
 
-#------ Plotting Paying Passenger and Integration Passenger and Free Passengers and Free Pass Students 
+#------ Plotting Paying Passenger and Integration Passenger and Free Passengers and Free Pass Students vs Month
 
-raw_data = {'first_name': ['Jason', 'Molly', 'Tina', 'Jake', 'Amy'],
-        'pre_score': [4, 24, 31, 2, 3],
-        'mid_score': [25, 94, 57, 62, 70],
-        'post_score': [5, 43, 23, 23, 51]}
-df = pd.DataFrame(raw_data, columns = ['first_name', 'pre_score', 'mid_score', 'post_score'])
+raw_data = {'Date': xTicks,
+        'Passageiros Pagantes': ytotal_paying,
+        'Passageiros com Integração': ytotal_integration,
+        'Passageiros com Gratuidade': ytotal_free_passengers,
+        'Passageiros Estudantes com Gratuidade': ytotal_free_students}
+df = pd.DataFrame(raw_data, columns = ['Date', 'Passageiros Pagantes','Passageiros com Integração', 'Passageiros com Gratuidade', 'Passageiros Estudantes com Gratuidade'])
 df
 
-# Create the general blog and the "subplots" i.e. the bars
+# Create the general and the "subplots" i.e. the bars
 f, ax1 = plt.subplots(1, figsize=(10,5))
 
 # Set the bar width
-bar_width = 0.15
+bar_width = 0.8
 
 # positions of the left bar-boundaries
-bar_l = [i+1 for i in range(len(df['pre_score']))]
+bar_l = [i+1 for i in range(len(df['Passageiros Pagantes']))]
 
 # positions of the x-axis ticks (center of the bars as bar labels)
-tick_pos = [1, 2, 3, 4, 5]
+tick_pos = list(range(1, len(xTicks) + 1))
 
-# Create a bar plot, in position bar_1
+# Create a bar plot
 ax1.bar(bar_l,
-        # using the pre_score data
-        df['pre_score'],
-        # set the width
+        df['Passageiros Pagantes'],
         width=bar_width,
-        # with the label pre score
-        label='Pre Score',
-        # with alpha 0.5
-        alpha=0.5,
-        # with color
-        color='#F4561D')
+        label='Passageiros Pagantes',
+        color='#F44336')
 
-# Create a bar plot, in position bar_1
+# Create a bar plot
 ax1.bar(bar_l,
-        # using the mid_score data
-        df['mid_score'],
-        # set the width
+        df['Passageiros com Integração'],
         width=bar_width,
-        # with pre_score on the bottom
-        bottom=df['pre_score'],
-        # with the label mid score
-        label='Mid Score',
-        # with alpha 0.5
-        alpha=0.5,
-        # with color
-        color='#F1911E')
+        bottom=df['Passageiros Pagantes'],
+        label='Passageiros com Integração',
+        color='#4A148C')
 
-# Create a bar plot, in position bar_1
+# Create a bar plot
 ax1.bar(bar_l,
-        # using the post_score data
-        df['post_score'],
-        # set the width
+        df['Passageiros com Gratuidade'],
         width=bar_width,
-        # with pre_score and mid_score on the bottom
-        bottom=[i+j for i,j in zip(df['pre_score'],df['mid_score'])],
-        # with the label post score
-        label='Post Score',
-        # with alpha 0.5
-        alpha=0.5,
-        # with color
-        color='#F1BD1A')
-test = df['first_name']
-# set the x ticks with names
-plt.xticks(tick_pos, df['first_name'])
+        bottom=[i+j for i,j in zip(df['Passageiros Pagantes'],df['Passageiros com Integração'])],
+        label='Passageiros com Gratuidade',
+        color='#48A51A')
+
+# Create a bar plot
+ax1.bar(bar_l,
+        df['Passageiros Estudantes com Gratuidade'],
+        width=bar_width,
+        bottom=[i+j+k for i,j,k in zip(df['Passageiros Pagantes'],df['Passageiros com Integração'], df['Passageiros com Gratuidade'])],
+        label='Passageiros Estudantes com Gratuidade',
+        color='#009688')
+
+# Set the x ticks with names
+plt.xticks(tick_pos, df['Date'], rotation = 60)
+
+# To label don't cut off 
+plt.gcf().subplots_adjust(bottom=0.25, left=0.1)
 
 # Set the label and legends
-ax1.set_ylabel("Total Passengers per Category")
-ax1.set_xlabel("Date")
-plt.legend(loc='upper left')
+ax1.set_ylabel("Total de Passageiros por Categoria \n (em milhões de Pasageiros)")
+ax1.set_xlabel("Data")
+plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25),
+          fancybox=True, shadow=True, ncol=4)
 
-# Set a buffer around the edge
-#plt.xlim([min(tick_pos)-bar_width, max(tick_pos)+bar_width])
-
-
-# Verificar quais 100 linhas são mais utilizadas 
+#----- Verificar quais 100 linhas são mais utilizadas 
 
 # Verificar quais 10 linhas são mais utilizadas por AREA
 
