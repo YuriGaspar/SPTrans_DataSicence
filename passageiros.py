@@ -240,17 +240,18 @@ ax1.set_xlabel("Data")
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25),
           fancybox=True, shadow=True, ncol=4)
 
-#----- Verificar quais 100 linhas são mais utilizadas 
-
-# Verificar quais 10 linhas são mais utilizadas por AREA
-
-# Verificar quais 5 linhas são mais utilizadas por EMPRESA
 
 # Verificar quais empresas transportam mais
-
+test = dataset_d["20170101"].groupby(by=["EMPRESA"])[dataset_d["20170101"].columns.values[-1]].sum()
 # Verificar concessão vs. permissão
 
 # verificar utilização por área (e entender o que significa)
+
+#------ Verificar quais 100 linhas são mais utilizadas 
+
+#------ Verificar quais 10 linhas são mais utilizadas por AREA
+
+#------ Verificar quais 5 linhas são mais utilizadas por EMPRESA
 
 # Verificar trajeto total e custo por passageiro e quilometragem e combustivel
 
