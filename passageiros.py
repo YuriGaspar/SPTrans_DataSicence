@@ -12,6 +12,8 @@ import pandas as pd
 import calendar
 import urllib3
 from datetime import datetime
+import locale
+locale.setlocale(locale.LC_ALL, 'German')
 
 #------ Importing the datasets
 
@@ -128,6 +130,13 @@ for year in range(2014, current_year + 1):
                  total_paying_month = dataset_d[date_str].iloc[:,dataset_d[date_str].shape[1] -4 ].sum() + total_paying_month
                  total_integration_month = dataset_d[date_str].iloc[:,dataset_d[date_str].shape[1] -3 ].sum() + total_integration_month
                  total_free_passengers_month = dataset_d[date_str].iloc[:,dataset_d[date_str].shape[1] -2 ].sum() + total_free_passengers_month
+        
+            empresa_today = dataset_d[date_str].groupby(by=["EMPRESA"])[dataset_d[date_str].columns.values[-1]].sum()
+            if time.strptime(date_str, "%Y%m%d") == time.strptime("20140101", "%Y%m%d"): 
+                empresa = dataset_d["20140101"].groupby(by=["EMPRESA"])[dataset_d["20140101"].columns.values[-1]].sum()
+            else: 
+                empresa = pd.concat([empresa_today, empresa], axis=1).fillna(0).sum(axis=1)
+
                 
         total[year_str+month_str] = int(total_month)
         total_paying[year_str+month_str] = int(total_paying_month)
@@ -135,9 +144,11 @@ for year in range(2014, current_year + 1):
         total_free_passengers[year_str+month_str] = int(total_free_passengers_month)
         total_free_students[year_str+month_str] = int(total_free_students_month)
         
-        print ("Para o Mês de {} de {}, somando-se dia a dia chegamos em {} passageiros.".format(month_list[month - 1].title(), year, ('%f' % total[year_str+month_str]).rstrip('0').rstrip('.')))
-        print ("Na planilha consolidada no Site da SPTrans o valor fornecido foi de {} passageiros".format(dataset_m[year_str + month_str].iloc[:,dataset_m[year_str + month_str].shape[1] -1].sum()))
-        print ("Diferença de {} passageiros".format(total[year_str+month_str] - dataset_m[year_str + month_str].iloc[:,dataset_m[year_str + month_str].shape[1] -1 ].sum() ))
+        locale.format('%.2d', dataset_m[year_str + month_str].iloc[:,dataset_m[year_str + month_str].shape[1] -1].sum(), True)
+        
+        print ("Para o Mês de {} de {}, somando-se dia a dia chegamos em {} passageiros.".format(month_list[month - 1].title(), year, locale.format('%.2d', total[year_str+month_str], True) ))
+        print ("Na planilha consolidada no Site da SPTrans o valor fornecido foi de {} passageiros".format(locale.format('%.2d', dataset_m[year_str + month_str].iloc[:,dataset_m[year_str + month_str].shape[1] -1].sum(), True)))
+        print ("Diferença de {} passageiros".format( locale.format('%.2d', total[year_str+month_str] - dataset_m[year_str + month_str].iloc[:,dataset_m[year_str + month_str].shape[1] -1 ].sum(), True) ))
         print ("")
         
         xTicks.append(month_list_abr[month - 1].title() + " " + year_str) # for plot
@@ -147,7 +158,7 @@ for year in range(2014, current_year + 1):
         ytotal_integration.append(total_integration_month/10**6)
         ytotal_free_passengers.append(total_free_passengers_month/10**6)
         ytotal_free_students.append(total_free_students_month/10**6)
-
+                
 #------ Some Statitics
 
 import statistics
@@ -238,11 +249,19 @@ plt.gcf().subplots_adjust(bottom=0.25, left=0.1)
 ax1.set_ylabel("Total de Passageiros por Categoria \n (em milhões de Pasageiros)")
 ax1.set_xlabel("Data")
 plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25),
-          fancybox=True, shadow=True, ncol=4)
+          fancybox=True, shadow=True, ncol=4)   
 
 
 # Verificar quais empresas transportam mais
 test = dataset_d["20170101"].groupby(by=["EMPRESA"])[dataset_d["20170101"].columns.values[-1]].sum()
+test2 = dataset_d["20170102"].groupby(by=["EMPRESA"])[dataset_d["20170102"].columns.values[-1]].sum()
+
+test4 =pd.concat([test, test2], axis=1).fillna(0).sum(axis=1)
+dataset_d["20170102"].columns.values[-1]
+
+df1 = pd.DataFrame([1, 1, 1, 1, 1], index=[ 1, 2, 3, 4 ,5 ], columns=['A'])  
+df2 = pd.DataFrame([ 1, 1, 1, 1, 1], index=[ 2, 3, 4, 5, 6], columns=['A']) 
+pd.concat([df1.A, df2.A], axis=1).fillna(0).sum(axis=1)
 # Verificar concessão vs. permissão
 
 # verificar utilização por área (e entender o que significa)
