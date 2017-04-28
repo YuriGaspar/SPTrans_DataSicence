@@ -132,12 +132,21 @@ for year in range(2014, current_year + 1):
                  total_free_passengers_month = dataset_d[date_str].iloc[:,dataset_d[date_str].shape[1] -2 ].sum() + total_free_passengers_month
         
             empresa_today = dataset_d[date_str].groupby(by=["EMPRESA"])[dataset_d[date_str].columns.values[-1]].sum()
-            if time.strptime(date_str, "%Y%m%d") == time.strptime("20140101", "%Y%m%d"): 
+            tipo_today = dataset_d[date_str].groupby(by=["TIPO"])[dataset_d[date_str].columns.values[-1]].sum()
+            area_today = dataset_d[date_str].groupby(by=["AREA"])[dataset_d[date_str].columns.values[-1]].sum()
+            linha_today = dataset_d[date_str].groupby(by=["LINHA"])[dataset_d[date_str].columns.values[-1]].sum()
+            
+            if year == 2014 and month == 1 and day == 1: 
                 empresa = dataset_d["20140101"].groupby(by=["EMPRESA"])[dataset_d["20140101"].columns.values[-1]].sum()
+                tipo = dataset_d["20140101"].groupby(by=["TIPO"])[dataset_d["20140101"].columns.values[-1]].sum()
+                area = dataset_d["20140101"].groupby(by=["AREA"])[dataset_d["20140101"].columns.values[-1]].sum()
+                linha = dataset_d["20140101"].groupby(by=["LINHA"])[dataset_d["20140101"].columns.values[-1]].sum()
             else: 
                 empresa = pd.concat([empresa_today, empresa], axis=1).fillna(0).sum(axis=1)
-
-                
+                tipo = pd.concat([tipo_today, tipo], axis=1).fillna(0).sum(axis=1)
+                area = pd.concat([area_today, area], axis=1).fillna(0).sum(axis=1)
+                linha = pd.concat([linha_today, linha], axis=1).fillna(0).sum(axis=1)
+                        
         total[year_str+month_str] = int(total_month)
         total_paying[year_str+month_str] = int(total_paying_month)
         total_integration[year_str+month_str] = int(total_integration_month)
@@ -158,7 +167,8 @@ for year in range(2014, current_year + 1):
         ytotal_integration.append(total_integration_month/10**6)
         ytotal_free_passengers.append(total_free_passengers_month/10**6)
         ytotal_free_students.append(total_free_students_month/10**6)
-                
+    
+        
 #------ Some Statitics
 
 import statistics
@@ -170,7 +180,7 @@ statistics.stdev(ytotal) # Sample standard deviation of data.
 plt.figure(figsize=(10,5))
 x = list(range(0, len(ytotal) ))
 plt.xticks(x, xTicks)
-plt.xticks(range(len(ytotal)), xTicks, rotation=60) #writes strings with 45 degree angle
+plt.xticks(range(len(ytotal)), xTicks, rotation=60) # writes strings with 45 degree angle
 colors = []
 for i in range(0, len(ytotal)):
     if i < 12:
@@ -179,7 +189,7 @@ for i in range(0, len(ytotal)):
         colors.append('#FFC107')
     elif i >= 24 and i < 36:
         colors.append('#4A148C')
-    else :
+    else:
         colors.append('#48A51A')
 plt.bar(x,ytotal, color=colors)
 plt.xlabel("Data")
@@ -252,21 +262,61 @@ plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25),
           fancybox=True, shadow=True, ncol=4)   
 
 
-# Verificar quais empresas transportam mais
-test = dataset_d["20170101"].groupby(by=["EMPRESA"])[dataset_d["20170101"].columns.values[-1]].sum()
-test2 = dataset_d["20170102"].groupby(by=["EMPRESA"])[dataset_d["20170102"].columns.values[-1]].sum()
+#------ Verificar quais empresas transportam mais
+empresa = empresa.reset_index()
+empresa.columns = ["EMPRESA", "PASSAGEIROS"]
+empresa = empresa.sort_values("PASSAGEIROS", ascending=False)
 
-test4 =pd.concat([test, test2], axis=1).fillna(0).sum(axis=1)
-dataset_d["20170102"].columns.values[-1]
+x = list(range(0, len(empresa["EMPRESA"].tolist())))
+plt.xticks(x, empresa["EMPRESA"].tolist())
+plt.xticks(range(len(empresa["EMPRESA"].tolist())), empresa["EMPRESA"].tolist(), rotation=90) # writes strings with 45 degree angle
+plt.bar(x, (empresa["PASSAGEIROS"]/10**6).tolist())
+plt.show()
 
-df1 = pd.DataFrame([1, 1, 1, 1, 1], index=[ 1, 2, 3, 4 ,5 ], columns=['A'])  
-df2 = pd.DataFrame([ 1, 1, 1, 1, 1], index=[ 2, 3, 4, 5, 6], columns=['A']) 
-pd.concat([df1.A, df2.A], axis=1).fillna(0).sum(axis=1)
-# Verificar concessão vs. permissão
+print (empresa)
 
-# verificar utilização por área (e entender o que significa)
+#------ Verificar concessão vs. permissão
+
+tipo = tipo.reset_index()
+tipo.columns = ["TIPO", "PASSAGEIROS"]
+tipo = tipo.sort_values("PASSAGEIROS", ascending=False)
+
+x = list(range(0, len(tipo["TIPO"].tolist())))
+plt.xticks(x, tipo["TIPO"].tolist())
+plt.xticks(range(len(tipo["TIPO"].tolist())), tipo["TIPO"].tolist(), rotation=90) # writes strings with 45 degree angle
+plt.bar(x, (tipo["PASSAGEIROS"]/10**6).tolist())
+plt.show()
+
+print (tipo)
+
+#------ Verificar utilização por Area
+area = area.reset_index()
+area.columns = ["AREA", "PASSAGEIROS"]
+area = area.sort_values("PASSAGEIROS", ascending=False)
+
+x = list(range(0, len(area["AREA"].tolist())))
+plt.xticks(x, area["AREA"].tolist())
+plt.xticks(range(len(area["AREA"].tolist())), area["AREA"].tolist(), rotation=90) # writes strings with 45 degree angle
+plt.bar(x, (area["PASSAGEIROS"]/10**6).tolist())
+plt.show()
+
+print (area)
 
 #------ Verificar quais 100 linhas são mais utilizadas 
+linha = linha.reset_index()
+
+linha = linha.head(100)
+linha.columns = ["LINHA", "PASSAGEIROS"]
+linha= linha.sort_values("PASSAGEIROS", ascending=False)
+
+x = list(range(0, len(linha["LINHA"].tolist())))
+plt.xticks(x, linha["LINHA"].tolist())
+plt.xticks(range(len(linha["LINHA"].tolist())), linha["LINHA"].tolist(), rotation=90) # writes strings with 45 degree angle
+plt.bar(x, (linha["PASSAGEIROS"]/10**6).tolist())
+plt.show()
+
+print (linha)
+
 
 #------ Verificar quais 10 linhas são mais utilizadas por AREA
 
