@@ -134,19 +134,25 @@ for year in range(2014, current_year + 1):
             empresa_today = dataset_d[date_str].groupby(by=["EMPRESA"])[dataset_d[date_str].columns.values[-1]].sum()
             tipo_today = dataset_d[date_str].groupby(by=["TIPO"])[dataset_d[date_str].columns.values[-1]].sum()
             area_today = dataset_d[date_str].groupby(by=["AREA"])[dataset_d[date_str].columns.values[-1]].sum()
-            linha_today = dataset_d[date_str].groupby(by=["LINHA"])[dataset_d[date_str].columns.values[-1]].sum()
+            linha_today = dataset_d[date_str].iloc[:, [1, 2, 3, 4, -1]]
             
             if year == 2014 and month == 1 and day == 1: 
                 empresa = dataset_d["20140101"].groupby(by=["EMPRESA"])[dataset_d["20140101"].columns.values[-1]].sum()
                 tipo = dataset_d["20140101"].groupby(by=["TIPO"])[dataset_d["20140101"].columns.values[-1]].sum()
                 area = dataset_d["20140101"].groupby(by=["AREA"])[dataset_d["20140101"].columns.values[-1]].sum()
-                linha = dataset_d["20140101"].groupby(by=["LINHA"])[dataset_d["20140101"].columns.values[-1]].sum()
+                linha = dataset_d["20140101"].iloc[:, [1, 2, 3, 4, -1]]
             else: 
                 empresa = pd.concat([empresa_today, empresa], axis=1).fillna(0).sum(axis=1)
                 tipo = pd.concat([tipo_today, tipo], axis=1).fillna(0).sum(axis=1)
                 area = pd.concat([area_today, area], axis=1).fillna(0).sum(axis=1)
+                
                 linha = pd.concat([linha_today, linha], axis=1).fillna(0).sum(axis=1)
-                        
+                
+        linha.columns.values[-1] = linha_today.columns.values[-1]
+        linha2_sum = pd.concat([linha_today, linha], axis=0).fillna(0)
+        linha2_sum = linha2_sum.groupby(by=["TIPO", "AREA", "EMPRESA", "LINHA"])[dataset_d["20140101"].columns.values[-1]].sum()
+        linha2_sum = linha2_sum.reset_index()
+        
         total[year_str+month_str] = int(total_month)
         total_paying[year_str+month_str] = int(total_paying_month)
         total_integration[year_str+month_str] = int(total_integration_month)
@@ -168,10 +174,23 @@ for year in range(2014, current_year + 1):
         ytotal_free_passengers.append(total_free_passengers_month/10**6)
         ytotal_free_students.append(total_free_students_month/10**6)
     
+
+#------ Creating a Index Renaming the Columns and Sorting 
 empresa = empresa.reset_index()
+empresa.columns = ["EMPRESA", "PASSAGEIROS"]
+empresa = empresa.sort_values("PASSAGEIROS", ascending=False)
+
 tipo = tipo.reset_index()
+tipo.columns = ["TIPO", "PASSAGEIROS"]
+tipo = tipo.sort_values("PASSAGEIROS", ascending=False)
+
 area = area.reset_index()
+area.columns = ["AREA", "PASSAGEIROS"]
+area = area.sort_values("PASSAGEIROS", ascending=False)
+
 linha = linha.reset_index()
+linha.columns = ["LINHA", "PASSAGEIROS"]
+linha= linha.sort_values("PASSAGEIROS", ascending=False)
 
 #------ Some Statitics
 
@@ -268,89 +287,67 @@ plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25),
 
 #------ Verificar quais empresas transportam mais
 
-empresa.columns = ["EMPRESA", "PASSAGEIROS"]
-empresa = empresa.sort_values("PASSAGEIROS", ascending=False)
-
-n_empresas = 20
-
-if n_empresas > len(empresa["EMPRESA"].tolist()):
-    n_empresas = len(empresa["EMPRESA"].tolist())
-
-x = list(range(0, n_empresas))
-plt.xticks(x, empresa["EMPRESA"].tolist())
-plt.xticks(range(0, n_empresas), empresa["EMPRESA"].tolist()[:n_empresas], rotation=90) # writes strings with 45 degree angle
-plt.bar(x, (empresa["PASSAGEIROS"]/10**6).tolist()[:n_empresas])
-plt.tight_layout()
-plt.xlabel("Empresa")
-plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
-plt.show()
-
-print (empresa)
+def mostusedcompanies(n_empresas):
+    if n_empresas > len(empresa["EMPRESA"].tolist()):
+        n_empresas = len(empresa["EMPRESA"].tolist())
+    
+    x = list(range(0, n_empresas))
+    plt.xticks(x, empresa["EMPRESA"].tolist())
+    plt.xticks(range(0, n_empresas), empresa["EMPRESA"].tolist()[:n_empresas], rotation=90) # writes strings with 45 degree angle
+    plt.bar(x, (empresa["PASSAGEIROS"]/10**6).tolist()[:n_empresas])
+    plt.tight_layout()
+    plt.xlabel("Empresa")
+    plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
+    plt.show()
+    
+    print (empresa)
 
 #------ Verificar concessão vs. permissão
-
-
-tipo.columns = ["TIPO", "PASSAGEIROS"]
-tipo = tipo.sort_values("PASSAGEIROS", ascending=False)
-
-x = list(range(0, len(tipo["TIPO"].tolist())))
-plt.xticks(x, tipo["TIPO"].tolist())
-plt.xticks(range(len(tipo["TIPO"].tolist())), tipo["TIPO"].tolist()) # writes strings with 45 degree angle
-plt.bar(x, (tipo["PASSAGEIROS"]/10**6).tolist())
-plt.tight_layout()
-plt.xlabel("Tipo")
-plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
-plt.show()
-
-print (tipo)
+def mostusedtype():
+    x = list(range(0, len(tipo["TIPO"].tolist())))
+    plt.xticks(x, tipo["TIPO"].tolist())
+    plt.xticks(range(len(tipo["TIPO"].tolist())), tipo["TIPO"].tolist()) # writes strings with 45 degree angle
+    plt.bar(x, (tipo["PASSAGEIROS"]/10**6).tolist())
+    plt.tight_layout()
+    plt.xlabel("Tipo")
+    plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
+    plt.show()
+    
+    print (tipo)
 
 #------ Verificar utilização por Area
+def mostusedareas():
+    x = list(range(0, len(area["AREA"].tolist())))
+    plt.xticks(x, area["AREA"].tolist())
+    plt.xticks(range(len(area["AREA"].tolist())), area["AREA"].tolist()) # writes strings with 45 degree angle
+    plt.bar(x, (area["PASSAGEIROS"]/10**6).tolist())
+    plt.tight_layout()
+    plt.xlabel("Área")
+    plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
+    plt.show()
+    
+    print (area)
 
-area.columns = ["AREA", "PASSAGEIROS"]
-area = area.sort_values("PASSAGEIROS", ascending=False)
+#------ 100 most used Lines
+def mostusedlines(n_linhas):
+    if n_linhas > len(linha["LINHA"].tolist()):
+        n_linhas = len(linha["LINHA"].tolist())
+    
+    plt.figure()
+    plt.barh(range(0, n_linhas), (linha["PASSAGEIROS"]/10**6)[:n_linhas], align='center', color='#009688')
+    plt.yticks(range(0, n_linhas),linha["LINHA"][:n_linhas], rotation = 0)
+    plt.gcf().subplots_adjust(left=0.3)
+    plt.xlabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
+    plt.ylabel("Linha")
+    plt.show()
+        
+    print (linha.head(n_linhas))
 
-x = list(range(0, len(area["AREA"].tolist())))
-plt.xticks(x, area["AREA"].tolist())
-plt.xticks(range(len(area["AREA"].tolist())), area["AREA"].tolist()) # writes strings with 45 degree angle
-plt.bar(x, (area["PASSAGEIROS"]/10**6).tolist())
-plt.tight_layout()
-plt.xlabel("Área")
-plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
-plt.show()
+mostusedcompanies(100) # Numbers of companies to plot
+mostusedtype()
+mostusedareas()
+mostusedlines(20) # Numbers of lines to plot
 
-print (area)
-
-#------ Verificar quais 100 linhas são mais utilizadas 
-
-linha = linha.head(100)
-linha.columns = ["LINHA", "PASSAGEIROS"]
-linha= linha.sort_values("PASSAGEIROS", ascending=True)
-linha["PASSAGEIROS"]
-n_linhas = 20
-
-if n_linhas > len(linha["LINHA"].tolist()):
-    n_linhas = len(linha["LINHA"].tolist())
-
-
-x = list(range(0, n_linhas))
-plt.xticks(x, linha["LINHA"].tolist())
-plt.xticks(range(0, n_linhas), linha["LINHA"].tolist()[:n_linhas], rotation=90) # writes strings with 45 degree angle
-plt.bar(x, (linha["PASSAGEIROS"]/10**6).tolist()[:n_linhas])
-plt.gcf().subplots_adjust(bottom=0.6)
-plt.xlabel("Linha")
-plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
-plt.show()
-
-plt.figure()
-plt.title("Models Accuracy")
-plt.barh(range(0, n_linhas), (linha["PASSAGEIROS"]/10**6)[:n_linhas], align='center', color='#009688')
-plt.yticks(range(0, n_linhas),linha["LINHA"][:n_linhas], rotation = 0)
-plt.gcf().subplots_adjust(left=0.3)
-plt.xlabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
-plt.ylabel("Linha")
-plt.show()
-
-print (linha)
 
 #------ Verificar quais 10 linhas são mais utilizadas por AREA
 
