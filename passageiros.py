@@ -168,7 +168,11 @@ for year in range(2014, current_year + 1):
         ytotal_free_passengers.append(total_free_passengers_month/10**6)
         ytotal_free_students.append(total_free_students_month/10**6)
     
-        
+empresa = empresa.reset_index()
+tipo = tipo.reset_index()
+area = area.reset_index()
+linha = linha.reset_index()
+
 #------ Some Statitics
 
 import statistics
@@ -263,60 +267,90 @@ plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25),
 
 
 #------ Verificar quais empresas transportam mais
-empresa = empresa.reset_index()
+
 empresa.columns = ["EMPRESA", "PASSAGEIROS"]
 empresa = empresa.sort_values("PASSAGEIROS", ascending=False)
 
-x = list(range(0, len(empresa["EMPRESA"].tolist())))
+n_empresas = 20
+
+if n_empresas > len(empresa["EMPRESA"].tolist()):
+    n_empresas = len(empresa["EMPRESA"].tolist())
+
+x = list(range(0, n_empresas))
 plt.xticks(x, empresa["EMPRESA"].tolist())
-plt.xticks(range(len(empresa["EMPRESA"].tolist())), empresa["EMPRESA"].tolist(), rotation=90) # writes strings with 45 degree angle
-plt.bar(x, (empresa["PASSAGEIROS"]/10**6).tolist())
+plt.xticks(range(0, n_empresas), empresa["EMPRESA"].tolist()[:n_empresas], rotation=90) # writes strings with 45 degree angle
+plt.bar(x, (empresa["PASSAGEIROS"]/10**6).tolist()[:n_empresas])
+plt.tight_layout()
+plt.xlabel("Empresa")
+plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
 plt.show()
 
 print (empresa)
 
 #------ Verificar concessão vs. permissão
 
-tipo = tipo.reset_index()
+
 tipo.columns = ["TIPO", "PASSAGEIROS"]
 tipo = tipo.sort_values("PASSAGEIROS", ascending=False)
 
 x = list(range(0, len(tipo["TIPO"].tolist())))
 plt.xticks(x, tipo["TIPO"].tolist())
-plt.xticks(range(len(tipo["TIPO"].tolist())), tipo["TIPO"].tolist(), rotation=90) # writes strings with 45 degree angle
+plt.xticks(range(len(tipo["TIPO"].tolist())), tipo["TIPO"].tolist()) # writes strings with 45 degree angle
 plt.bar(x, (tipo["PASSAGEIROS"]/10**6).tolist())
+plt.tight_layout()
+plt.xlabel("Tipo")
+plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
 plt.show()
 
 print (tipo)
 
 #------ Verificar utilização por Area
-area = area.reset_index()
+
 area.columns = ["AREA", "PASSAGEIROS"]
 area = area.sort_values("PASSAGEIROS", ascending=False)
 
 x = list(range(0, len(area["AREA"].tolist())))
 plt.xticks(x, area["AREA"].tolist())
-plt.xticks(range(len(area["AREA"].tolist())), area["AREA"].tolist(), rotation=90) # writes strings with 45 degree angle
+plt.xticks(range(len(area["AREA"].tolist())), area["AREA"].tolist()) # writes strings with 45 degree angle
 plt.bar(x, (area["PASSAGEIROS"]/10**6).tolist())
+plt.tight_layout()
+plt.xlabel("Área")
+plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
 plt.show()
 
 print (area)
 
 #------ Verificar quais 100 linhas são mais utilizadas 
-linha = linha.reset_index()
 
 linha = linha.head(100)
 linha.columns = ["LINHA", "PASSAGEIROS"]
-linha= linha.sort_values("PASSAGEIROS", ascending=False)
+linha= linha.sort_values("PASSAGEIROS", ascending=True)
+linha["PASSAGEIROS"]
+n_linhas = 20
 
-x = list(range(0, len(linha["LINHA"].tolist())))
+if n_linhas > len(linha["LINHA"].tolist()):
+    n_linhas = len(linha["LINHA"].tolist())
+
+
+x = list(range(0, n_linhas))
 plt.xticks(x, linha["LINHA"].tolist())
-plt.xticks(range(len(linha["LINHA"].tolist())), linha["LINHA"].tolist(), rotation=90) # writes strings with 45 degree angle
-plt.bar(x, (linha["PASSAGEIROS"]/10**6).tolist())
+plt.xticks(range(0, n_linhas), linha["LINHA"].tolist()[:n_linhas], rotation=90) # writes strings with 45 degree angle
+plt.bar(x, (linha["PASSAGEIROS"]/10**6).tolist()[:n_linhas])
+plt.gcf().subplots_adjust(bottom=0.6)
+plt.xlabel("Linha")
+plt.ylabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
+plt.show()
+
+plt.figure()
+plt.title("Models Accuracy")
+plt.barh(range(0, n_linhas), (linha["PASSAGEIROS"]/10**6)[:n_linhas], align='center', color='#009688')
+plt.yticks(range(0, n_linhas),linha["LINHA"][:n_linhas], rotation = 0)
+plt.gcf().subplots_adjust(left=0.3)
+plt.xlabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
+plt.ylabel("Linha")
 plt.show()
 
 print (linha)
-
 
 #------ Verificar quais 10 linhas são mais utilizadas por AREA
 
