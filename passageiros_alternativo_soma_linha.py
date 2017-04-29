@@ -99,8 +99,6 @@ ytotal_integration = []
 ytotal_free_passengers = []
 ytotal_free_students = []
 
-xyz = []
-
 for year in range(2014, current_year + 1):
     for month in range(1, 13):
         
@@ -136,29 +134,19 @@ for year in range(2014, current_year + 1):
             empresa_today = dataset_d[date_str].groupby(by=["EMPRESA"])[dataset_d[date_str].columns.values[-1]].sum()
             tipo_today = dataset_d[date_str].groupby(by=["TIPO"])[dataset_d[date_str].columns.values[-1]].sum()
             area_today = dataset_d[date_str].groupby(by=["AREA"])[dataset_d[date_str].columns.values[-1]].sum()
-            linha_today = dataset_d[date_str].iloc[:, [1, 2, 3, 4, -1]]
+            linha_today = dataset_d[date_str].groupby(by=["LINHA"])[dataset_d[date_str].columns.values[-1]].sum()
             
             if year == 2014 and month == 1 and day == 1: 
-                empresa = empresa_today
-                tipo = tipo_today
-                area = area_today
-                linha = linha_today
+                empresa = dataset_d["20140101"].groupby(by=["EMPRESA"])[dataset_d["20140101"].columns.values[-1]].sum()
+                tipo = dataset_d["20140101"].groupby(by=["TIPO"])[dataset_d["20140101"].columns.values[-1]].sum()
+                area = dataset_d["20140101"].groupby(by=["AREA"])[dataset_d["20140101"].columns.values[-1]].sum()
+                linha = dataset_d["20140101"].groupby(by=["LINHA"])[dataset_d["20140101"].columns.values[-1]].sum()
             else: 
                 empresa = pd.concat([empresa_today, empresa], axis=1).fillna(0).sum(axis=1)
                 tipo = pd.concat([tipo_today, tipo], axis=1).fillna(0).sum(axis=1)
                 area = pd.concat([area_today, area], axis=1).fillna(0).sum(axis=1)
-                linha_today.columns.values[-1] = "PASSAGEIROS"
-                linha.columns.values[-1] = "PASSAGEIROS"
-                linha = pd.concat([linha_today, linha], axis=0).fillna(0)
-                linha = linha.groupby(by=["TIPO", "AREA", "EMPRESA", "LINHA"])[linha.columns.values[-1]].sum()
-                linha = linha.reset_index()
-                
-                if (linha.loc[linha['LINHA'] == 0]).empty:
-                    i = 2
-                else:
-                    print(date_str)
-                    xyz.append(date_str)
-                
+                linha = pd.concat([linha_today, linha], axis=1).fillna(0).sum(axis=1)
+                        
         total[year_str+month_str] = int(total_month)
         total_paying[year_str+month_str] = int(total_paying_month)
         total_integration[year_str+month_str] = int(total_integration_month)
@@ -194,10 +182,9 @@ area = area.reset_index()
 area.columns = ["AREA", "PASSAGEIROS"]
 area = area.sort_values("PASSAGEIROS", ascending=False)
 
-#linha = linha.reset_index()
-#linha.columns.values[-1] = "PASSAGEIROS"
-linha = linha.drop(linha.index[[0]])
-linha = linha.sort_values("PASSAGEIROS", ascending=False)
+linha = linha.reset_index()
+linha.columns = ["LINHA", "PASSAGEIROS"]
+linha= linha.sort_values("PASSAGEIROS", ascending=False)
 
 #------ Some Statitics
 
