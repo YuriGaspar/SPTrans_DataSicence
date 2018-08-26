@@ -205,9 +205,16 @@ for index, row in linha_linha.iterrows():
     
 #------ Some Statitics
 
+
 import statistics
-statistics.mean(ytotal) # Arithmetic mean (average) of data.
-statistics.stdev(ytotal) # Sample standard deviation of data.
+print ("Arithmetic mean (average) of data: {}".format(statistics.mean(ytotal)))
+print ("Sample standard deviation of data: {}".format(statistics.stdev(ytotal)))
+
+linha_linha["DISTTRAJETO"].mean()
+linha_linha["DISTTRAJETO"].max()
+linha_linha["DISTTRAJETO"].min()
+linha_linha["DISTTRAJETO"].std()
+
 
 #------ Plotting Total Passengers vs. Month
 def totalpassengersvsdate():
@@ -316,7 +323,7 @@ def mostusedcompanies(n_empresas):
     x = list(range(0, n_empresas))
     plt.figure(figsize=(10,5))
     plt.xticks(x, empresa["EMPRESA"].tolist())
-    plt.xticks(range(0, n_empresas), empresa["EMPRESA"].tolist()[:n_empresas], rotation=90) # writes strings with 45 degree angle
+    plt.xticks(range(0, n_empresas), empresa["EMPRESA"].tolist()[:n_empresas], rotation=90) 
     plt.bar(x, (empresa["PASSAGEIROS"]/10**6).tolist()[:n_empresas])
     plt.gcf().subplots_adjust(left=0.3)
     plt.tight_layout()
@@ -332,7 +339,7 @@ def mostusedtype():
     x = list(range(0, len(tipo["TIPO"].tolist())))
     plt.figure(figsize=(10,5))
     plt.xticks(x, tipo["TIPO"].tolist())
-    plt.xticks(range(len(tipo["TIPO"].tolist())), tipo["TIPO"].tolist()) # writes strings with 45 degree angle
+    plt.xticks(range(len(tipo["TIPO"].tolist())), tipo["TIPO"].tolist())
     plt.bar(x, (tipo["PASSAGEIROS"]/10**6).tolist(), color="#009688")
     plt.gcf().subplots_adjust(left=0.3)
     plt.tight_layout()
@@ -347,7 +354,7 @@ def mostusedareas():
     x = list(range(0, len(area["AREA"].tolist())))
     plt.figure(figsize=(10,5))
     plt.xticks(x, area["AREA"].tolist())
-    plt.xticks(range(len(area["AREA"].tolist())), area["AREA"].tolist()) # writes strings with 45 degree angle
+    plt.xticks(range(len(area["AREA"].tolist())), area["AREA"].tolist())
     plt.bar(x, (area["PASSAGEIROS"]/10**6).tolist(), color="#009688")
     plt.gcf().subplots_adjust(left=0.3)
     plt.tight_layout()
@@ -433,7 +440,26 @@ def mostusedlinespercompanie(n_linhas, companie):
     plt.show()
         
     print (linha.head(n_linhas))
-    
+
+#------ Plotting the Normal
+
+def normal():
+    positivos = linha_linha[linha_linha.DISTTRAJETO > 0].DISTTRAJETO
+    aleatorios = pd.Series(np.random.randn(100*len(positivos)), name='normal')
+    plt.hist(aleatorios, bins=75, width=0.1)
+
+#------ Plotting the Histogram of Distances
+
+def histdistance ():
+    positivos = linha_linha[linha_linha.DISTTRAJETO > 0].DISTTRAJETO
+    plt.hist(positivos, bins=95, edgecolor = "black")
+    plt.axvline(linha_linha["DISTTRAJETO"].mean(), color='b', linestyle='dashed', linewidth=2)
+    plt.annotate('Média de {} km por trajeto'.format("{0:.2f}".format(linha_linha["DISTTRAJETO"].mean()/1000)), 
+                xy=(linha_linha["DISTTRAJETO"].mean(), 0), 
+                xytext=(linha_linha["DISTTRAJETO"].mean(), -5.0), 
+                arrowprops = dict(facecolor='black', shrink=0.05))
+
+linha_linha["DISTTRAJETO"].median()
 #------ Calling the Plots :)
 totalpassengersvsdate()
 typepassengervsdate()
@@ -443,7 +469,8 @@ mostusedareas()
 mostusedlines(20) # Number of lines to plot
 mostusedlinesperarea(20, "AREA 3") # Number of lines and the area to plot
 mostusedlinespercompanie(20, "GATUSA")
-
+normal()
+histdistance()
 
 #------ TO DO
 
@@ -451,8 +478,9 @@ mostusedlinespercompanie(20, "GATUSA")
 
 # Deletar linhas com problemas NAN e/ou vazias (e descobir o que são)
 
-# Verificar trajeto total e custo por passageiro e quilometragem e combustivel
+# Verificar trajeto total e custo por passageiro e quilometragem
 
+# 
 shapes = pd.read_csv('gtfs/shapes.txt', sep=",")
 routes = pd.read_csv('gtfs/routes.txt', sep=",")
 trips = pd.read_csv('gtfs/trips.txt', sep=",")
@@ -475,20 +503,7 @@ for index, row in shapes.iterrows():
 
 for index, row in linha_linha.iterrows():
     if np.isnan(row[3]) == False:
-        print ("Na linha {} temos um uma relação de {} Passageiros por km ".format(row[0], locale.format('%2d', 1000*row[1]/row[3]) ))
+        print ("Na linha {} temos um uma relação de {} Passageiros por km ".format(row[0], "{0:.2f}".format(1000*row[1]/row[3]) ))
 
-
-positivos = linha_linha[linha_linha.DISTTRAJETO > 0].DISTTRAJETO
-aleatorios = pd.Series(np.random.randn(100*len(positivos)), name='normal')
-plt.hist(aleatorios, bins=75, width=0.1)
-
-plt.hist(positivos, bins=85)
-
-#plt.figure(figsize=(10,5))
-#plt.hist(positivos, bins=75, width=1000, color="#009688")
-#plt.yticks(range(0, n_linhas), linha_comp["LINHA"][:n_linhas], rotation = 0)
-#plt.gcf().subplots_adjust(left=0.3)
-#plt.xlabel('Quantidade de Passageiros Trasportados \n (em milhões de Pasageiros)')
-#plt.ylabel("Linha")
-#plt.title("As {} linhas mais usadas pela Empresa {}".format(n_linhas, companie.title() ))
-#plt.show()
+222/(1/0.28 + 1/0.31 + 1/0.25 + 1/0.23)
+1/(1/0.28)
